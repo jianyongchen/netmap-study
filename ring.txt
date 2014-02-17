@@ -1,0 +1,34 @@
+/*
+ *
+ * Here is the layout for the Rx and Tx rings.
+
+       RxRING                            TxRING
+
+      +-----------------+            +-----------------+
+      |                 |            |                 |
+      |XXX free slot XXX|            |XXX free slot XXX|
+      +-----------------+            +-----------------+
+      |                 |<-hwcur     |                 |<-hwcur
+      | reserved    h   |            | (ready          |
+      +-----------  w  -+            |  to be          |
+ cur->|             a   |            |  sent)      h   |
+      |             v   |            +----------   w   |
+      |             a   |       cur->| (being      a   |
+      |             i   |            |  prepared)  v   |
+      | avail       l   |            |             a   |
+      +-----------------+            +  a  ------  i   +
+      |                 | ...        |  v          l   |<-hwlease
+      | (being          | ...        |  a              | ...
+      |  prepared)      | ...        |  i              | ...
+      +-----------------+ ...        |  l              | ...
+      |                 |<-hwlease   +-----------------+
+      |                 |            |                 |
+      |                 |            |                 |
+      |                 |            |                 |
+      |                 |            |                 |
+      +-----------------+            +-----------------+
+
+ * The cur/avail (user view) and hwcur/hwavail (kernel view)
+ * are used in the normal operation of the card.
+ *
+ */

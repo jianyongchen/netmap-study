@@ -1,0 +1,44 @@
+ net_device
++----------------+
+|                |
+| ax25_ptr     ----------+
++----------------+       |
+                         |
++----------------+<------+
+|(netmap_adapter)|
+|                |                             netmap_kring
+| tx_rings *--------------------------------->+---------------+
+|                |       netmap_kring         | ring    *---------.
+| rx_rings *--------->+---------------+       | nr_hwcur      |   |
++----------------+    | ring    *--------.    | nr_hwavail    |   V
+                      | nr_hwcur      |  |    | selinfo       |   |
+                      | nr_hwavail    |  |    +---------------+   .
+                      | selinfo       |  |    |     ...       |   .
+                      +---------------+  |    |(ntx+1 entries)|
+                      |    ....       |  |    |               |
+                      |(nrx+1 entries)|  |    +---------------+
+                      |               |  |
+   KERNEL             +---------------+  |
+                                         |
+=====================================================================
+                                         |
+   USERSPACE                             |      NETMAP_RING
+                                         +---->+-------------+
+                                             / | cur         |
+   NETMAP_IF  (nifp, one per file desc.)    /  | avail       |
+    +---------------+                      /   | buf_ofs     |
+    | ni_tx_rings   |                     /    +=============+
+    | ni_rx_rings   |                    /     | buf_idx     | slot[0]
+    |               |                   /      | len, flags  |
+    |               |                  /       +-------------+
+    +===============+                 /        | buf_idx     | slot[1]
+    | txring_ofs[0] | (rel.to nifp)--'         | len, flags  |
+    | txring_ofs[1] |                          +-------------+
+  (num_rings+1 entries)                     (nr_num_slots entries)
+    | txring_ofs[n] |                          | buf_idx     | slot[n-1]
+    +---------------+                          | len, flags  |
+    | rxring_ofs[0] |                          +-------------+
+    | rxring_ofs[1] |
+  (num_rings+1 entries)
+    | txring_ofs[n] |
+    +---------------+
